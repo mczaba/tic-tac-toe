@@ -25,8 +25,12 @@ const gameBoard = (() => {
             }
         }
     }
+    const giveCase = (number) => {
+        let result = board[number];
+        return result;
+    }
 
-    return {write, show, render};
+    return {write, show, render, giveCase};
 })();
 
 const player = (name, number) => {
@@ -52,7 +56,41 @@ const gameController =((player1, player2) => {
     const turnDisplay = () => {
         turnDisplayer.textContent = turn.getName() + "'s turn";
     }
-    return {turnChange, playerTurn, turnDisplay}
+    const winTest = () => {
+        let result = false;
+        const rowTest = (number) => {
+            if ((gameBoard.giveCase(number)===gameBoard.giveCase(number + 1 ))&&(gameBoard.giveCase(number)===gameBoard.giveCase(number +2 ))){
+                if (gameBoard.giveCase(number) !== "" ){
+                    result = true;
+                }
+            }
+        }
+        const colTest = (number) => {
+            if ((gameBoard.giveCase(number)===gameBoard.giveCase(number + 3 ))&&(gameBoard.giveCase(number)===gameBoard.giveCase(number +6 ))){
+                if (gameBoard.giveCase(number) !== "" ){
+                    result = true;
+                }
+            }
+        }
+        const diagTest = () => {
+            if(((gameBoard.giveCase(0)===gameBoard.giveCase(4))&&(gameBoard.giveCase(0)===gameBoard.giveCase(8)))
+            ||((gameBoard.giveCase(2)===gameBoard.giveCase(4))&&(gameBoard.giveCase(2)===gameBoard.giveCase(6)))){
+                if (gameBoard.giveCase(4) !== "" ){
+                    result = true;
+                }
+            }
+        }
+        rowTest(0);
+        rowTest(3);
+        rowTest(6);
+        colTest(0);
+        colTest(1);
+        colTest(2);
+        diagTest();
+        
+        return result;
+    }
+    return {turnChange, playerTurn, turnDisplay, winTest}
 })(martin, helene);
 
 
@@ -62,6 +100,9 @@ cases.forEach((div) => {
         let casesArray = Array.from(cases);
         let index = casesArray.indexOf(div);
         gameController.playerTurn().play(index);
+        if (gameController.winTest()){
+            alert(gameController.playerTurn().getName() + " has won")
+        }
         gameController.turnChange();
     })
 })
