@@ -1,0 +1,20 @@
+body {
+    text-align: center;
+}
+
+#displayBoard {
+    margin: auto;
+    display: grid;
+    grid-template-columns: 200px 200px 200px;
+    grid-template-rows: 200px 200px 200px;
+    border: 1px black solid;
+    height: 600px;
+    width: 600px; 
+}
+
+#displayBoard div{
+    border:1px black solid;
+    height: 200px;
+    width: 200px;
+    font-size: 200px;
+}
