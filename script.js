@@ -1,11 +1,16 @@
 const displayBoard = document.querySelector("#displayBoard");
 const cases = document.querySelectorAll(".uneCase");
 const turnDisplayer = document.querySelector("#turnDisplayer");
-
+const clearButton = document.querySelector("#clearGame");
+const play1Name = document.querySelector("#player1Name");
+const play2Name = document.querySelector("#player2Name");
+const startGame = document.querySelector("#startGame");
+const playerDiv = document.querySelector("#players");
+const changePlayers = document.querySelector("#newGame");
 
 const gameBoard = (() => {
-    const board = ["","","","","","","","",""];
-    const write = (caseNumber,string) => {board[caseNumber] = string;}
+    const board = [0,0,0,0,0,0,0,0,0];
+    const write = (caseNumber,number) => {board[caseNumber] = number;}
     const show = () => {
         console.log(board[0] + "|" + board[1] + "|" + board[2]);
         console.log(board[3] + "|" + board[4] + "|" + board[5]);
@@ -29,28 +34,46 @@ const gameBoard = (() => {
         let result = board[number];
         return result;
     }
+    const clear = () => {
+        for (let i=0;i<9;i++){
+            write(i,0);
+        }
+        render();
 
-    return {write, show, render, giveCase};
+    }
+
+    return {write, show, render, giveCase, clear};
 })();
 
 const player = (name, number) => {
-    const getName = () => name;
+    let playerName = name;
+    const getName = () => playerName;
     const play = (caseNumber) => {
-        gameBoard.write(caseNumber,number);
-        gameBoard.render();
+        if (gameBoard.giveCase(caseNumber)===0){
+            gameBoard.write(caseNumber,number);
+            gameBoard.render();
+            return true;
+        }
+        else {return false;}
     }
-    return {getName, play};
+    const changeName = (newName) => {
+        playerName = newName;
+        gameController.turnDisplay();
+    }
+    return {getName, play, changeName};
 };
 
-const martin = player("martin", 1);
-const helene = player("helene", 2);
+const player1 = player("Player 1", 1);
+const player2 = player("Player 2", 2);
 
 const gameController =((player1, player2) => {
     let turn = player1;
+    let turnNumber = 1;
     const turnChange = () => {
         if (turn === player1){turn = player2;}
         else {turn = player1;}
         turnDisplay();
+        turnNumber++;
     }
     const playerTurn = () => turn;
     const turnDisplay = () => {
@@ -60,14 +83,14 @@ const gameController =((player1, player2) => {
         let result = false;
         const rowTest = (number) => {
             if ((gameBoard.giveCase(number)===gameBoard.giveCase(number + 1 ))&&(gameBoard.giveCase(number)===gameBoard.giveCase(number +2 ))){
-                if (gameBoard.giveCase(number) !== "" ){
+                if (gameBoard.giveCase(number) !== 0 ){
                     result = true;
                 }
             }
         }
         const colTest = (number) => {
             if ((gameBoard.giveCase(number)===gameBoard.giveCase(number + 3 ))&&(gameBoard.giveCase(number)===gameBoard.giveCase(number +6 ))){
-                if (gameBoard.giveCase(number) !== "" ){
+                if (gameBoard.giveCase(number) !== 0 ){
                     result = true;
                 }
             }
@@ -75,7 +98,7 @@ const gameController =((player1, player2) => {
         const diagTest = () => {
             if(((gameBoard.giveCase(0)===gameBoard.giveCase(4))&&(gameBoard.giveCase(0)===gameBoard.giveCase(8)))
             ||((gameBoard.giveCase(2)===gameBoard.giveCase(4))&&(gameBoard.giveCase(2)===gameBoard.giveCase(6)))){
-                if (gameBoard.giveCase(4) !== "" ){
+                if (gameBoard.giveCase(4) !== 0 ){
                     result = true;
                 }
             }
@@ -90,31 +113,54 @@ const gameController =((player1, player2) => {
         
         return result;
     }
-    return {turnChange, playerTurn, turnDisplay, winTest}
-})(martin, helene);
 
+    const newGame = () => {
+        turn = player1;
+        gameBoard.clear();
+        turnDisplay();
+    }
 
-
-cases.forEach((div) => {
-    div.addEventListener("click", () => {
+    const play = (e) => {
+        const div = e.target;
         let casesArray = Array.from(cases);
         let index = casesArray.indexOf(div);
-        gameController.playerTurn().play(index);
-        if (gameController.winTest()){
-            alert(gameController.playerTurn().getName() + " has won")
+        let validMove = playerTurn().play(index);
+        if (winTest()){
+            alert(playerTurn().getName() + " has won")
         }
-        gameController.turnChange();
-    })
-})
+        else if (turnNumber === 9){
+            alert("it's a draw!");
+        }
+        if (validMove){
+            turnChange();
+        }
+    }
 
-gameController.turnDisplay();
-// console.log(gameController.playerTurn());
-// gameController.turnChange();
-// console.log(gameController.playerTurn());
-// gameController.turnChange();
-// console.log(gameController.playerTurn());
-martin.play(4);
-// helene.play(2);
-// gameBoard.show();
-// gameBoard.render();
-// gameBoard.render();
+    const initialize = () => {
+        player1.changeName(play1Name.value);
+        player2.changeName(play2Name.value);
+        playerDiv.style.display = "none";
+        play1Name.value = "player 1";
+        play2Name.value = "player 2";
+        turnDisplay();
+        cases.forEach((div) => {
+            div.addEventListener("click", play)
+        })
+
+    }
+    const stopGame = () => {
+        playerDiv.style.display = "inline-block";
+        gameBoard.clear();
+        cases.forEach((div) => {
+            div.removeEventListener("click", play)
+        })
+    }
+
+    return {turnDisplay, newGame, initialize, stopGame}
+})(player1, player2);
+
+startGame.addEventListener("click", gameController.initialize)
+changePlayers.addEventListener("click", gameController.stopGame)
+clearButton.addEventListener("click",gameController.newGame)
+
+
