@@ -39,6 +39,7 @@ const gameBoard = (() => {
             write(i,0);
         }
         render();
+        gameController.resetTurn();
 
     }
 
@@ -127,9 +128,11 @@ const gameController =((player1, player2) => {
         let validMove = playerTurn().play(index);
         if (winTest()){
             alert(playerTurn().getName() + " has won")
+            gameBoard.clear();
         }
         else if (turnNumber === 9){
             alert("it's a draw!");
+            gameBoard.clear();
         }
         if (validMove){
             turnChange();
@@ -155,8 +158,11 @@ const gameController =((player1, player2) => {
             div.removeEventListener("click", play)
         })
     }
+    const resetTurn = () => {
+        turnNumber = 1;
+    }
 
-    return {turnDisplay, newGame, initialize, stopGame}
+    return {turnDisplay, newGame, initialize, stopGame, resetTurn}
 })(player1, player2);
 
 startGame.addEventListener("click", gameController.initialize)
