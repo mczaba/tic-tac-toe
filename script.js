@@ -7,6 +7,8 @@ const play2Name = document.querySelector("#player2Name");
 const startGame = document.querySelector("#startGame");
 const playerDiv = document.querySelector("#players");
 const changePlayers = document.querySelector("#newGame");
+const botSelect = document.querySelector("#botSelect");
+
 
 const gameBoard = (() => {
     const board = [0,0,0,0,0,0,0,0,0];
@@ -46,8 +48,9 @@ const gameBoard = (() => {
     return {write, show, render, giveCase, clear};
 })();
 
-const player = (name, number) => {
+const player = (name, number, bot) => {
     let playerName = name;
+    let playerBot = bot;
     const getName = () => playerName;
     const play = (caseNumber) => {
         if (gameBoard.giveCase(caseNumber)===0){
@@ -61,11 +64,20 @@ const player = (name, number) => {
         playerName = newName;
         gameController.turnDisplay();
     }
-    return {getName, play, changeName};
+    const isBot = () => playerBot;
+    const makeBot = (test) => {
+        if (test){
+        playerBot = true;
+        }
+        else {
+            playerBot = false;
+        }
+    }
+    return {getName, play, changeName, isBot, makeBot};
 };
 
-const player1 = player("Player 1", 1);
-const player2 = player("Player 2", 2);
+const player1 = player("Player 1", 1, false);
+const player2 = player("Player 2", 2, false);
 
 const gameController =((player1, player2) => {
     let turn = player1;
@@ -121,7 +133,7 @@ const gameController =((player1, player2) => {
         turnDisplay();
     }
 
-    const play = (e) => {
+    const turnPlay = (e) => {
         const div = e.target;
         let casesArray = Array.from(cases);
         let index = casesArray.indexOf(div);
@@ -134,20 +146,37 @@ const gameController =((player1, player2) => {
             alert("it's a draw!");
             gameBoard.clear();
         }
-        if (validMove){
-            turnChange();
+        else{
+            if (validMove){
+                turnChange();
+            }
+            while (playerTurn().isBot()){
+                let randomCase = Math.floor((Math.random() * 8));
+                let validMoveBot = playerTurn().play(randomCase);
+                if (validMoveBot){
+                    turnChange();
+                }
+            }
         }
     }
 
     const initialize = () => {
         player1.changeName(play1Name.value);
         player2.changeName(play2Name.value);
+        if (botSelect.value === "true"){
+            player2.makeBot(true);
+        }
+        else {
+            player2.makeBot(false);
+        }
+        turn = player1;
         playerDiv.style.display = "none";
         play1Name.value = "player 1";
         play2Name.value = "player 2";
+
         turnDisplay();
         cases.forEach((div) => {
-            div.addEventListener("click", play)
+            div.addEventListener("click", turnPlay)
         })
 
     }
@@ -155,7 +184,7 @@ const gameController =((player1, player2) => {
         playerDiv.style.display = "inline-block";
         gameBoard.clear();
         cases.forEach((div) => {
-            div.removeEventListener("click", play)
+            div.removeEventListener("click", turnPlay)
         })
     }
     const resetTurn = () => {
