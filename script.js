@@ -148,7 +148,17 @@ const gameController =((player1, player2) => {
         }
         let randomCase = possiblePlay[Math.floor(Math.random() * possiblePlay.length)];
         playerTurn().play(randomCase);
-        turnChange();
+        if (winTest()){
+            alert(playerTurn().getName() + " has won")
+            gameBoard.clear();
+        }
+        else if (turnNumber === 9){
+            alert("it's a draw!");
+            gameBoard.clear();
+        }
+        else{
+            turnChange();
+        }
     }
 
     const turnPlay = (e) => {
@@ -167,8 +177,11 @@ const gameController =((player1, player2) => {
         else{
             if (validMove){
                 turnChange();
+                if (playerTurn().isBot()){
+                    computerPlay();
+                }
             }
-            computerPlay();
+            
         }
     }
 
