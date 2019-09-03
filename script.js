@@ -52,19 +52,13 @@ const player = (name, number, bot) => {
     let playerName = name;
     let playerBot = bot;
     const getName = () => playerName;
-    const play = (caseNumber) => {
-        if (gameBoard.giveCase(caseNumber)===0){
-            gameBoard.write(caseNumber,number);
-            gameBoard.render();
-            return true;
-        }
-        else {return false;}
-    }
+    
     const changeName = (newName) => {
         playerName = newName;
         gameController.turnDisplay();
     }
     const isBot = () => playerBot;
+
     const makeBot = (test) => {
         if (test){
         playerBot = true;
@@ -73,6 +67,16 @@ const player = (name, number, bot) => {
             playerBot = false;
         }
     }
+
+    const play = (caseNumber) => {
+        if (gameBoard.giveCase(caseNumber)===0){
+            gameBoard.write(caseNumber,number);
+            gameBoard.render();
+            return true;
+        }
+        else {return false;}
+    }
+
     return {getName, play, changeName, isBot, makeBot};
 };
 
@@ -82,16 +86,20 @@ const player2 = player("Player 2", 2, false);
 const gameController =((player1, player2) => {
     let turn = player1;
     let turnNumber = 1;
+
     const turnChange = () => {
         if (turn === player1){turn = player2;}
         else {turn = player1;}
         turnDisplay();
         turnNumber++;
     }
+
     const playerTurn = () => turn;
+
     const turnDisplay = () => {
         turnDisplayer.textContent = turn.getName() + "'s turn";
     }
+
     const winTest = () => {
         let result = false;
         const rowTest = (number) => {
@@ -133,6 +141,16 @@ const gameController =((player1, player2) => {
         turnDisplay();
     }
 
+    const computerPlay = () => {
+        let possiblePlay = [];
+        for (let i = 0 ; i<9 ; i++){
+            if (gameBoard.giveCase(i)===0){possiblePlay.push(i);}
+        }
+        let randomCase = possiblePlay[Math.floor(Math.random() * possiblePlay.length)];
+        playerTurn().play(randomCase);
+        turnChange();
+    }
+
     const turnPlay = (e) => {
         const div = e.target;
         let casesArray = Array.from(cases);
@@ -150,13 +168,7 @@ const gameController =((player1, player2) => {
             if (validMove){
                 turnChange();
             }
-            while (playerTurn().isBot()){
-                let randomCase = Math.floor((Math.random() * 8));
-                let validMoveBot = playerTurn().play(randomCase);
-                if (validMoveBot){
-                    turnChange();
-                }
-            }
+            computerPlay();
         }
     }
 
