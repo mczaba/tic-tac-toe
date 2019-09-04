@@ -58,6 +58,7 @@ const gameBoard = (() => {
 const player = (name, number, bot) => {
     let playerName = name;
     let playerBot = bot;
+    let playerNumber = number;
     const getName = () => playerName;
     
     const changeName = (newName) => {
@@ -83,8 +84,9 @@ const player = (name, number, bot) => {
         }
         else {return false;}
     }
+    const getNumber = () => playerNumber;
 
-    return {getName, play, changeName, isBot, makeBot};
+    return {getName, play, changeName, isBot, makeBot, getNumber};
 };
 
 const player1 = player("Player 1", 1, false);
@@ -107,25 +109,22 @@ const gameController =((player1, player2) => {
         turnDisplayer.textContent = turn.getName() + "'s turn";
     }
 
-    const winTest = (board) => {
+    const winTest = (board, player) => {
         let result = false;
         const rowTest = (number) => {
-            if ((board[number]===board[number+1])&&(board[number]===board[number+2])){
-                if (board[number] !== 0 ){
-                    result = true;
-                }
+            if ((board[number]===player)&&(board[number+1]===player)&&(board[number+2]===player)){
+                result = true;
             }
         }
         const colTest = (number) => {
-            if ((board[number]===board[number +3])&&(board[number]===board[number+6])){
+            if ((board[number]===player)&&(board[number+3]===player)&&(board[number+6]===player)){
                 if (board[number] !== 0 ){
                     result = true;
                 }
             }
         }
         const diagTest = () => {
-            if(((board[0]===board[4])&&(board[4]===board[8]))
-            ||((board[2]===board[4])&&(board[2]===board[6]))){
+            if(((board[0]===player)&&(board[4]===player)&&(board[8]===player)) || ((board[2]===player)&&(board[4]===player)&&(board[6]===player))){
                 if (board[4] !== 0 ){
                     result = true;
                 }
@@ -147,47 +146,87 @@ const gameController =((player1, player2) => {
         gameBoard.clear();
         turnDisplay();
     }
+    
+    const minimax = (board, player) => {
+        let opponent = 1;
+        if (player === 1){opponent =2;}
+        if (winTest(board, player)){
+            return 1;
+        }
+        else if (winTest(board, opponent)){
+            return -1;
+        }
+        let move =-1;
+        let score = -2;
+        for (let i =0; i<9; i++){
+            if (board[i]===0){
+                let boardWithNewMove = [];
+                for (let i=0;i<9;i++){
+                    boardWithNewMove[i]=board[i];
+                }
+                boardWithNewMove[i]=player;
+                let scoreForTheMove = -1*minimax(boardWithNewMove,opponent);
+                if (scoreForTheMove>score){
+                    score = scoreForTheMove;
+                    move=i;
+                }
+            }
+        }
+        if (move === -1){
+            return 0;
+        }
+        return score;
+    }
+     
 
     const computerPlay = () => {
-        const minimax = (board, playerNumber, index) => {
-            let result = 3;
-            let newBoard = board
-            newBoard[index] = playerNumber;
-            if (winTest(newBoard)){
-                result = playerNumber;
+        const minimax = (board, player) => {
+            let opponent = 1;
+            if (player === 1){opponent =2;}
+            if (winTest(board, player)){
+                return 1;
             }
-            else {
-                if (playerNumber === 2){newPlayerNumber = 1;}
-                else {newPlayerNumber = 2;}
-                let possiblePlay = [];
-                for (let i = 0 ; i<9 ; i++){
-                    if (newBoard[i]===0){possiblePlay.push(i);}
-                }
-                for (let i=0;i<possiblePlay.length;i++){
-                    if (result > minimax(newBoard, newPlayerNumber, possiblePlay[i])){
-                        result = minimax(newBoard, newPlayerNumber, possiblePlay[i]);
+            else if (winTest(board, opponent)){
+                return -1;
+            }
+            let move =-1;
+            let score = -2;
+            for (let i =0; i<9; i++){
+                if (board[i]===0){
+                    let boardWithNewMove = [];
+                    for (let i=0;i<9;i++){
+                        boardWithNewMove[i]=board[i];
+                    }
+                    boardWithNewMove[i]=player;
+                    let scoreForTheMove = -1*minimax(boardWithNewMove,opponent);
+                    if (scoreForTheMove>score){
+                        score = scoreForTheMove;
+                        move=i;
                     }
                 }
             }
-            return result;
+            if (move === -1){
+                return 0;
+            }
+            return score;
         }
 
         let possiblePlay = [];
         for (let i = 0 ; i<9 ; i++){
-            if (gameBoard.giveCase(i)===0){possiblePlay.push([i,3]);}
+            if (gameBoard.giveCase(i)===0){possiblePlay.push(i);}
         }
-        let indexPlay = 0;
-        for (let i = 0 ; i < possiblePlay.length; i++){
-            possiblePlay[i][1]=minimax(gameBoard.copy(),2,possiblePlay[i][0]);
-            if (possiblePlay[i][1] > possiblePlay[indexPlay][1]){
-                indexPlay = i;
+        let minmaxScore = 2;
+        let shouldPlay = 0;
+        for (let i = 0; i < possiblePlay.length; i++){
+            let newBoard = gameBoard.copy();
+            newBoard[possiblePlay[i]]=2;
+            let moveScore = minimax(newBoard,1);
+            if (moveScore < minmaxScore){
+                minmaxScore = moveScore;
+                shouldPlay = i;
             }
         }
-
-
-
-        // let randomCase = possiblePlay[Math.floor(Math.random() * possiblePlay.length)];
-        playerTurn().play(possiblePlay[indexPlay][0]);
+        playerTurn().play(possiblePlay[shouldPlay]);
         if (winTest(gameBoard.copy())){
             alert(playerTurn().getName() + " has won")
             gameBoard.clear();
@@ -206,7 +245,7 @@ const gameController =((player1, player2) => {
         let casesArray = Array.from(cases);
         let index = casesArray.indexOf(div);
         let validMove = playerTurn().play(index);
-        if (winTest(gameBoard.copy())){
+        if (winTest(gameBoard.copy(),playerTurn().getNumber())){
             alert(playerTurn().getName() + " has won")
             gameBoard.clear();
         }
@@ -256,7 +295,7 @@ const gameController =((player1, player2) => {
         turnNumber = 1;
     }
 
-    return {turnDisplay, newGame, initialize, stopGame, resetTurn}
+    return {turnDisplay, newGame, initialize, stopGame, resetTurn, minimax}
 })(player1, player2);
 
 startGame.addEventListener("click", gameController.initialize)
