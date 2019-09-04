@@ -227,7 +227,7 @@ const gameController =((player1, player2) => {
             }
         }
         playerTurn().play(possiblePlay[shouldPlay]);
-        if (winTest(gameBoard.copy())){
+        if (winTest(gameBoard.copy(),playerTurn().getNumber())){
             alert(playerTurn().getName() + " has won")
             gameBoard.clear();
         }
