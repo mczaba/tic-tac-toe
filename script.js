@@ -230,10 +230,14 @@ const gameController =((player1, player2) => {
         if (winTest(gameBoard.copy(),playerTurn().getNumber())){
             alert(playerTurn().getName() + " has won")
             gameBoard.clear();
+            turn = player1;
+            turnDisplay();
         }
         else if (turnNumber === 9){
             alert("it's a draw!");
             gameBoard.clear();
+            turn = player1;
+            turnDisplay();
         }
         else{
             turnChange();
@@ -248,6 +252,8 @@ const gameController =((player1, player2) => {
         if (winTest(gameBoard.copy(),playerTurn().getNumber())){
             alert(playerTurn().getName() + " has won")
             gameBoard.clear();
+            turn = player1;
+            turnDisplay();
         }
         else if (turnNumber === 9){
             alert("it's a draw!");
