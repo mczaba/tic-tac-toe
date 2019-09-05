@@ -22,13 +22,15 @@ const gameBoard = (() => {
         
         for (let i =0; i<9; i++){
             if (board[i] === 1){
-                cases[i].textContent = "X";
+                cases[i].style.backgroundImage = "url('img/cross.png')";
+                cases[i].style.backgroundSize = "150px";
             }
             else if (board[i] === 2){
-                cases[i].textContent = "O";
+                cases[i].style.backgroundImage = "url('img/circle.png')";
             }
             else {
-                cases[i].textContent = "";
+                cases[i].style.backgroundImage = "none";
+                cases[i].style.backgroundSize = "200px";
             }
         }
     }
@@ -145,37 +147,6 @@ const gameController =((player1, player2) => {
         turn = player1;
         gameBoard.clear();
         turnDisplay();
-    }
-    
-    const minimax = (board, player) => {
-        let opponent = 1;
-        if (player === 1){opponent =2;}
-        if (winTest(board, player)){
-            return 1;
-        }
-        else if (winTest(board, opponent)){
-            return -1;
-        }
-        let move =-1;
-        let score = -2;
-        for (let i =0; i<9; i++){
-            if (board[i]===0){
-                let boardWithNewMove = [];
-                for (let i=0;i<9;i++){
-                    boardWithNewMove[i]=board[i];
-                }
-                boardWithNewMove[i]=player;
-                let scoreForTheMove = -1*minimax(boardWithNewMove,opponent);
-                if (scoreForTheMove>score){
-                    score = scoreForTheMove;
-                    move=i;
-                }
-            }
-        }
-        if (move === -1){
-            return 0;
-        }
-        return score;
     }
      
 
@@ -296,16 +267,16 @@ const gameController =((player1, player2) => {
         cases.forEach((div) => {
             div.removeEventListener("click", turnPlay)
         })
+        turnDisplayer.textContent="";
+
     }
     const resetTurn = () => {
         turnNumber = 1;
     }
 
-    return {turnDisplay, newGame, initialize, stopGame, resetTurn, minimax}
+    return {turnDisplay, newGame, initialize, stopGame, resetTurn}
 })(player1, player2);
 
 startGame.addEventListener("click", gameController.initialize)
 changePlayers.addEventListener("click", gameController.stopGame)
 clearButton.addEventListener("click",gameController.newGame)
-
-

@@ -1,5 +1,6 @@
 body {
     text-align: center;
+    background-color: #EEEEEE;
 }
 
 #displayBoard {
@@ -7,19 +8,44 @@ body {
     display: grid;
     grid-template-columns: 200px 200px 200px;
     grid-template-rows: 200px 200px 200px;
-    border: 1px black solid;
     height: 600px;
     width: 600px; 
+    box-shadow: 10px 10px 8px black;
 }
 
-#displayBoard div{
-    border:1px black solid;
-    height: 200px;
-    width: 200px;
-    font-size: 200px;
+#startGame {
+    margin-top: 10px;
+}
+#botSelect {
+    /* background-color:white; */
 }
 
+#displayBoard div:hover{
+    background-color: #EEEEEE;
+    cursor: pointer;
+}
 
 #clearGame {
     margin-top: 50px;
+}
+
+.uneCase {
+    background-position: center;
+    background-repeat: no-repeat;
+    border-collapse: collapse;
+    border:1px black solid;
+    height: 200px;
+    width: 200px;
+    background-color: white;
+}
+
+button {
+    background-color: #33C3F0;
+    color: white;
+    border-color: #33C3F0;
+    text-transform: uppercase;
+    height: 38px;
+    padding: 0px 30px;
+    font-size: 11px;
+    border-radius: 5px;
 }
