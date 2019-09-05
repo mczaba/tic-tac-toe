@@ -12,13 +12,13 @@ const botSelect = document.querySelector("#botSelect");
 
 const gameBoard = (() => {
     const board = [0,0,0,0,0,0,0,0,0];
-    const write = (caseNumber,number) => {board[caseNumber] = number;}
-    const show = () => {
+    const write = (caseNumber,number) => {board[caseNumber] = number;} 
+    const show = () => { //show the board in the console
         console.log(board[0] + "|" + board[1] + "|" + board[2]);
         console.log(board[3] + "|" + board[4] + "|" + board[5]);
         console.log(board[6] + "|" + board[7] + "|" + board[8]);
     }
-    const render = () => {
+    const render = () => { //render the board
         
         for (let i =0; i<9; i++){
             if (board[i] === 1){
@@ -34,11 +34,11 @@ const gameBoard = (() => {
             }
         }
     }
-    const giveCase = (number) => {
+    const giveCase = (number) => {//gives the number inside the asked case
         let result = board[number];
         return result;
     }
-    const clear = () => {
+    const clear = () => { //clear the board and reset the game
         for (let i=0;i<9;i++){
             write(i,0);
         }
@@ -46,7 +46,7 @@ const gameBoard = (() => {
         gameController.resetTurn();
 
     }
-    let copy = () => {
+    let copy = () => { //make a copy of the board
         let boardCopy = [];
         for (let i = 0; i<9 ; i++){
             boardCopy[i]=board[i];
@@ -59,8 +59,8 @@ const gameBoard = (() => {
 
 const player = (name, number, bot) => {
     let playerName = name;
-    let playerBot = bot;
-    let playerNumber = number;
+    let playerBot = bot; //true if the player is a bot
+    let playerNumber = number; //what number corresponds to the player in the board array
     const getName = () => playerName;
     
     const changeName = (newName) => {
@@ -69,7 +69,7 @@ const player = (name, number, bot) => {
     }
     const isBot = () => playerBot;
 
-    const makeBot = (test) => {
+    const makeBot = (test) => { //make the player a bot
         if (test){
         playerBot = true;
         }
@@ -78,15 +78,19 @@ const player = (name, number, bot) => {
         }
     }
 
-    const play = (caseNumber) => {
+    const play = (caseNumber) => { 
+        //plays in the case with index caseNumber and returns true if the move was valid or false otherwise
         if (gameBoard.giveCase(caseNumber)===0){
+            //check if the case is empty, and plays the case if it is
             gameBoard.write(caseNumber,number);
             gameBoard.render();
             return true;
         }
-        else {return false;}
+        else {//if case wasn't empty does nothing and returns false
+            return false;
+        }
     }
-    const getNumber = () => playerNumber;
+    const getNumber = () => playerNumber; 
 
     return {getName, play, changeName, isBot, makeBot, getNumber};
 };
@@ -96,9 +100,9 @@ const player2 = player("Player 2", 2, false);
 
 const gameController =((player1, player2) => {
     let turn = player1;
-    let turnNumber = 1;
+    let turnNumber = 1; //at turn 9 declare a draw if no winner was detecter
     
-    const turnChange = () => {
+    const turnChange = () => { //change whose player turn is it
         if (turn === player1){turn = player2;}
         else {turn = player1;}
         turnDisplay();
@@ -107,11 +111,11 @@ const gameController =((player1, player2) => {
 
     const playerTurn = () => turn;
 
-    const turnDisplay = () => {
+    const turnDisplay = () => { //display which player turn it is
         turnDisplayer.textContent = turn.getName() + "'s turn";
     }
 
-    const winTest = (board, player) => {
+    const winTest = (board, player) => { //check if player has won the game
         let result = false;
         const rowTest = (number) => {
             if ((board[number]===player)&&(board[number+1]===player)&&(board[number+2]===player)){
@@ -143,15 +147,16 @@ const gameController =((player1, player2) => {
         return result;
     }
 
-    const newGame = () => {
+    const newGame = () => { //reset the game
         turn = player1;
         gameBoard.clear();
         turnDisplay();
     }
      
 
-    const computerPlay = () => {
-        const minimax = (board, player) => {
+    const computerPlay = () => { //algorithm for the computer's turn
+        const minimax = (board, player) => { 
+            //this function checks which case is the most advantageous to player given a board and whose turn it is
             let opponent = 1;
             if (player === 1){opponent =2;}
             if (winTest(board, player)){
@@ -163,32 +168,34 @@ const gameController =((player1, player2) => {
             let move =-1;
             let score = -2;
             for (let i =0; i<9; i++){
-                if (board[i]===0){
-                    let boardWithNewMove = [];
+                if (board[i]===0){//if move is valid
+                    let boardWithNewMove = []; //make a copy of the board
                     for (let i=0;i<9;i++){
                         boardWithNewMove[i]=board[i];
                     }
-                    boardWithNewMove[i]=player;
-                    let scoreForTheMove = -1*minimax(boardWithNewMove,opponent);
-                    if (scoreForTheMove>score){
+                    boardWithNewMove[i]=player; //plays the move
+                    let scoreForTheMove = -1*minimax(boardWithNewMove,opponent); 
+                    //returns the minimax of the new board from the opponent perspective. *-1 because it's the opponents perspective
+                    if (scoreForTheMove>score){//look for the best play possible
                         score = scoreForTheMove;
                         move=i;
                     }
                 }
             }
-            if (move === -1){
+            if (move === -1){//if there's no winning move, return 0
                 return 0;
             }
             return score;
         }
 
-        let possiblePlay = [];
+        let possiblePlay = [];//array of possible moves
         for (let i = 0 ; i<9 ; i++){
             if (gameBoard.giveCase(i)===0){possiblePlay.push(i);}
         }
         let minmaxScore = 2;
-        let shouldPlay = 0;
-        for (let i = 0; i < possiblePlay.length; i++){
+        let shouldPlay = 0; 
+        for (let i = 0; i < possiblePlay.length; i++){ 
+            //check all possible moves for the minimax 
             let newBoard = gameBoard.copy();
             newBoard[possiblePlay[i]]=2;
             let moveScore = minimax(newBoard,1);
@@ -197,41 +204,42 @@ const gameController =((player1, player2) => {
                 shouldPlay = i;
             }
         }
-        playerTurn().play(possiblePlay[shouldPlay]);
+        playerTurn().play(possiblePlay[shouldPlay]); //plays the move with highest minimax
         if (winTest(gameBoard.copy(),playerTurn().getNumber())){
+            //if computer wins display the winner and reset the game
             alert(playerTurn().getName() + " has won")
-            gameBoard.clear();
-            turn = player1;
-            turnDisplay();
+            newGame();
         }
         else if (turnNumber === 9){
+            //if he didn't win and it's last turn display a draw and reset the game
             alert("it's a draw!");
-            gameBoard.clear();
-            turn = player1;
-            turnDisplay();
+            newGame();
         }
         else{
+            //if he didn't win and it's not the last turn, then change turn
             turnChange();
         }
     }
 
     const turnPlay = (e) => {
+        //turn for the player, take the click on a case event
         const div = e.target;
+        //div is the case clicked
         let casesArray = Array.from(cases);
         let index = casesArray.indexOf(div);
-        let validMove = playerTurn().play(index);
+        //makes an array from the nodelist and get the index corresponding to the div
+        let validMove = playerTurn().play(index); //plays the index of the div
         if (winTest(gameBoard.copy(),playerTurn().getNumber())){
             alert(playerTurn().getName() + " has won")
-            gameBoard.clear();
-            turn = player1;
-            turnDisplay();
+            newGame();
         }
         else if (turnNumber === 9){
             alert("it's a draw!");
-            gameBoard.clear();
+            newGame();
         }
         else{
             if (validMove){
+                //if the move wasn't valid it does not change turn
                 turnChange();
                 if (playerTurn().isBot()){
                     computerPlay();
@@ -242,6 +250,7 @@ const gameController =((player1, player2) => {
     }
 
     const initialize = () => {
+        //initialize the game with players names and make player 2 a bot if checked
         player1.changeName(play1Name.value);
         player2.changeName(play2Name.value);
         if (botSelect.value === "true"){
@@ -257,11 +266,13 @@ const gameController =((player1, player2) => {
 
         turnDisplay();
         cases.forEach((div) => {
+            //makes the cases clickable to play
             div.addEventListener("click", turnPlay)
         })
 
     }
     const stopGame = () => {
+        //stop the game, hide the turn displayer and makes cases unclickable
         playerDiv.style.display = "inline-block";
         gameBoard.clear();
         cases.forEach((div) => {
